@@ -3,7 +3,7 @@
 This database uses Postgres to store data on the reviews left on products.
 
 The schema for this database looks something like this:
-[Screen Shot 2022-06-08 at 23 17 22](https://user-images.githubusercontent.com/76196672/172733053-f904f18e-21cb-4960-bce9-0fef532da747.png)
+![Screen Shot 2022-06-08 at 23 17 22](https://user-images.githubusercontent.com/76196672/172733053-f904f18e-21cb-4960-bce9-0fef532da747.png)
 
 To load the data (stored in CSV files) into a Postgres database, I ran the following lines in the terminal:
 
