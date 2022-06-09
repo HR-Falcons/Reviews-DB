@@ -1,12 +1,15 @@
 // connect to database
 const { Sequelize, DataTypes } = require('sequelize');
-const { getCharacteristicById } = require('controllers/characteristic.js');
+const characteristics = require('./controllers/characteristic');
+var router = require('express').Router();
 
-const sequelize = new Sequelize('postgres://localhost:5432/postgres')
-
-sequelize.authenticate()
-  .then(res => console.log('connection established', res))
-  .catch(err => console.log('couldnt connect to database', err));
+// given
+router.get('/characteristics/:product_id', (req, res, next) => {
+  //
+  characteristics.getById(req.params.product_id)
+    .then(characteristics => res.status(200).send(characteristics))
+    .catch(err => console.log('couldnt send characteristics data', err));
+})
 
 // const Reviews = sequelize.design('reviews', {
 //   id: {
@@ -49,3 +52,5 @@ sequelize.authenticate()
 // }, {
 //   freezeTableName: true
 // })
+
+module.exports = router;
