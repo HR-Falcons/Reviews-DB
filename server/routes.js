@@ -1,27 +1,12 @@
 // connect to database
 const { Sequelize, DataTypes } = require('sequelize');
+const { getCharacteristicById } = require('controllers/characteristic.js');
 
 const sequelize = new Sequelize('postgres://localhost:5432/postgres')
 
 sequelize.authenticate()
   .then(res => console.log('connection established', res))
   .catch(err => console.log('couldnt connect to database', err));
-
-const Characteristic = sequelize.define('characteristics', {
-  product_id:  {
-    type: DataTypes.INTEGER
-  },
-  name: {
-    type: DataTypes.STRING(32)
-  }
-}, {
-  freezeTableName: true,
-  timestamps: false
-})
-
-Characteristic.findAll()
-  .then(res => console.log('yo this is my data', res))
-  .catch(err => console.log('couldnt query data from database', err));
 
 // const Reviews = sequelize.design('reviews', {
 //   id: {
