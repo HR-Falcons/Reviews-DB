@@ -17,6 +17,28 @@ const Characteristic = sequelize.define('characteristics', {
   timestamps: false
 })
 
+const Characteristic_Review = sequelize.define('characteristic_reviews', {
+  characteristic_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'characteristics'
+    }
+  },
+  review_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'reviews'
+    }
+  },
+  value: {
+    type: DataTypes.INTEGER
+  }
+}, {
+  freezeTableName: true,
+  timestamps: false
+})
+
 module.exports = {
   Characteristic,
+  Characteristic_Review
 }

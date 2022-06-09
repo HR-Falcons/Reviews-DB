@@ -4,6 +4,9 @@ const getById = function(id) {
   return Characteristic.findAll({
     where: {
       product_id: id
+    },
+    include: {
+
     }
   })
   .then(res => {
