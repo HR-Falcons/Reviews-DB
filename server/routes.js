@@ -1,16 +1,20 @@
 // connect to database
 const { Sequelize, DataTypes } = require('sequelize');
 const characteristics = require('./controllers/characteristic');
+const reviews = require('./controllers/reviews');
 var router = require('express').Router();
 
-// given
 router.get('/characteristics/:product_id', (req, res, next) => {
-  //
   characteristics.getById(req.params.product_id)
     .then(characteristics => res.status(200).send(characteristics))
     .catch(err => console.log('couldnt send characteristics data', err));
 })
 
+router.get('/reviews/metadata', (req, res, next) => {
+  reviews.getMetaData(req.query.product_id)
+    .then(metadata => res.status(200).send(metadata))
+    .catch(err => console.log('couldnt send metadata', err));
+})
 // const Reviews = sequelize.design('reviews', {
 //   id: {
 //     type: DataTypes.INT PRIMARY KEY,
