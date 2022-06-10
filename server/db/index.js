@@ -15,7 +15,7 @@ const Characteristic = db.define('characteristics', {
 }, {
   freezeTableName: true,
   timestamps: false
-})
+});
 
 const Characteristic_Review = db.define('characteristic_reviews', {
   characteristic_id: {
@@ -36,52 +36,67 @@ const Characteristic_Review = db.define('characteristic_reviews', {
 }, {
   freezeTableName: true,
   timestamps: false
+});
+
+const Review = db.define('reviews', {
+  product_id: {
+    type: DataTypes.INTEGER,
+  },
+  rating: {
+    type: DataTypes.INTEGER,
+  },
+  date: {
+    type: DataTypes.STRING(16),
+  },
+  summary: {
+    type: DataTypes.STRING(124),
+  },
+  body: {
+    type: DataTypes.STRING(1024),
+  },
+  recommend: {
+    type: DataTypes.BOOLEAN,
+  },
+  reported: {
+    type: DataTypes.BOOLEAN,
+  },
+  reviewer_name: {
+    type: DataTypes.STRING(32),
+  },
+  reviewer_email: {
+    type: DataTypes.STRING(48),
+  },
+  response: {
+    type: DataTypes.STRING(1024),
+  },
+  helpfulness: {
+    type: DataTypes.INTEGER,
+  }
+}, {
+  freezeTableName: true,
+  timestamps: false
+});
+
+const Review_Photos = db.define('reviews_photos', {
+  review_id: {
+    type: DataTypes.INTEGER
+  },
+  url: {
+    type: DataTypes.STRING(164)
+  }
+}, {
+  freezeTableName: true,
+  timestamps: false
 })
 
-// const Reviews = sequelize.design('reviews', {
-//   id: {
-//     type: DataTypes.INT PRIMARY KEY,
-//     allowNull: false
-//   },
-//   product_id: {
-//     type: DataTypes.INT,
-//   },
-//   rating: {
-//     type: DataTypes.INT,
-//   },
-//   date: {
-//     type: DataTypes.STRING(16),
-//   },
-//   summary: {
-//     type: DataTypes.STRING(124),
-//   },
-//   body: {
-//     type: DataTypes.STRING(1024),
-//   },
-//   recommend: {
-//     type: DataTypes.BOOLEAN,
-//   },
-//   reported: {
-//     type: DataTypes.BOOLEAN,
-//   },
-//   reviewer_name: {
-//     type: DataTypes.STRING(32),
-//   },
-//   reviewer_email: {
-//     type: DataTypes.STRING(48),
-//   },
-//   response: {
-//     type: DataTypes.STRING(1024),
-//   },
-//   helpfulness: {
-//     type: DataTypes.INT,
-//   }
-// }, {
-//   freezeTableName: true
-// })
+Review.hasMany(Review_Photos, {
+  foreignKey: 'review_id'
+})
 
 module.exports = {
   db,
   Characteristic,
-  Characteristic_Review
+  Characteristic_Review,
+  Review,
+  Review_Photos
 }

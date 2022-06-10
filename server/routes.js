@@ -10,6 +10,12 @@ router.get('/characteristics/:product_id', (req, res, next) => {
     .catch(err => console.log('couldnt send characteristics data', err));
 })
 
+router.get('/reviews', (req, res, next) => {
+  reviews.getReviews(req.query.product_id)
+  .then(reviews => res.status(200).send(reviews))
+  .catch(err => console.error('Couldnt send response for reviews', err));
+})
+
 router.get('/reviews/metadata', (req, res, next) => {
   reviews.getMetaData(req.query.product_id)
     .then(metadata => {
