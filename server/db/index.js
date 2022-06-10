@@ -1,13 +1,11 @@
-// connect to database
 const { Sequelize, DataTypes } = require('sequelize');
+const db = new Sequelize('postgres://localhost:5432/postgres');
 
-const sequelize = new Sequelize('postgres://localhost:5432/postgres')
-
-sequelize.authenticate()
-  .then(res => console.log('connection established', res))
+db.authenticate()
+  .then(res => console.log('connection established'))
   .catch(err => console.log('couldnt connect to database', err));
 
-const Characteristic = sequelize.define('characteristics', {
+const Characteristic = db.define('characteristics', {
   product_id:  {
     type: DataTypes.INTEGER
   },
@@ -19,9 +17,26 @@ const Characteristic = sequelize.define('characteristics', {
   timestamps: false
 })
 
-Characteristic.findAll()
-  .then(res => console.log('yo this is my data', res))
-  .catch(err => console.log('couldnt query data from database', err));
+const Characteristic_Review = db.define('characteristic_reviews', {
+  characteristic_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Characteristic
+    }
+  },
+  review_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'reviews'
+    }
+  },
+  value: {
+    type: DataTypes.INTEGER
+  }
+}, {
+  freezeTableName: true,
+  timestamps: false
+})
 
 // const Reviews = sequelize.design('reviews', {
 //   id: {
@@ -64,3 +79,9 @@ Characteristic.findAll()
 // }, {
 //   freezeTableName: true
 // })
+
+module.exports = {
+  db,
+  Characteristic,
+  Characteristic_Review
+}
