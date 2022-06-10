@@ -8,7 +8,7 @@ function getMetaData(id) {
                   INNER JOIN characteristics
                   ON characteristic_reviews.characteristic_id = characteristics.id
                   WHERE reviews.product_id = ${id}`)
-          .then(res => res)
+          .then(res => res[0])
           .catch(err => console.log('couldnt get metadata for product', err));
 }
 

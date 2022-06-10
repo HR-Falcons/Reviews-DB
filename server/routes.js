@@ -12,49 +12,51 @@ router.get('/characteristics/:product_id', (req, res, next) => {
 
 router.get('/reviews/metadata', (req, res, next) => {
   reviews.getMetaData(req.query.product_id)
-    .then(metadata => res.status(200).send(metadata))
+    .then(metadata => {
+
+      let data = {
+        id: req.query.product_id,
+        ratings: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+        recommended: {
+          0: 0
+        },
+        characteristics: {
+          Fit: {
+            value: 0
+          },
+          Width: {
+            value: 0
+          },
+          Comfort: {
+            value: 0
+          },
+          Quality: {
+            value: 0
+          }
+        }
+      }
+
+      let totalProducts = 0;
+
+      metadata.forEach(entry => {
+        data.ratings[entry.rating]++;
+        data.recommended[0] += entry.recommend ? 1 : 0;
+        // data.characteristics[entry.name].value += entry.value;
+        totalProducts++;
+        console.log(entry);
+      })
+      totalProducts /= 4;
+      for (let key in data.ratings) {
+        data.ratings[key] /= 4;
+      }
+      data.recommended[0] /= 4;
+      for (let key in data.characteristics) {
+        data.characteristics[key].value = (data.characteristics[key].value / totalProducts).toFixed(4);
+      }
+
+      res.status(200).send(data)
+    })
     .catch(err => console.log('couldnt send metadata', err));
 })
-// const Reviews = sequelize.design('reviews', {
-//   id: {
-//     type: DataTypes.INT PRIMARY KEY,
-//     allowNull: false
-//   },
-//   product_id: {
-//     type: DataTypes.INT,
-//   },
-//   rating: {
-//     type: DataTypes.INT,
-//   },
-//   date: {
-//     type: DataTypes.STRING(16),
-//   },
-//   summary: {
-//     type: DataTypes.STRING(124),
-//   },
-//   body: {
-//     type: DataTypes.STRING(1024),
-//   },
-//   recommend: {
-//     type: DataTypes.BOOLEAN,
-//   },
-//   reported: {
-//     type: DataTypes.BOOLEAN,
-//   },
-//   reviewer_name: {
-//     type: DataTypes.STRING(32),
-//   },
-//   reviewer_email: {
-//     type: DataTypes.STRING(48),
-//   },
-//   response: {
-//     type: DataTypes.STRING(1024),
-//   },
-//   helpfulness: {
-//     type: DataTypes.INT,
-//   }
-// }, {
-//   freezeTableName: true
-// })
 
 module.exports = router;
