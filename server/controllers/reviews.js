@@ -1,12 +1,13 @@
-const { db, Review } = require('../db/index.js');
+const { db, Review, Review_Photos } = require('../db/index.js');
 
 function getReviews(id) {
   return Review.findAll({
-    // include: [
-    //   {
-    //     model:
-    //   }
-    // ],
+    include: [
+      {
+        model: Review_Photos,
+        attributes: ['url']
+      }
+    ],
     where: {
       product_id: id
     }
