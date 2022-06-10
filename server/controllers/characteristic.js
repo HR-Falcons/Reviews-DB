@@ -1,21 +1,12 @@
-const { Characteristic } = require('../db/index.js');
+const { db } = require('../db/index.js');
 
 const getById = function(id) {
-  return Characteristic.findAll({
-    where: {
-      product_id: id
-    },
-    include: {
-
-    }
-  })
+  return db.query(`SELECT characteristics.*, characteristic_reviews.*
+                  FROM characteristics INNER JOIN characteristic_reviews
+                  ON characteristics.id = characteristic_reviews.characteristic_id
+                  WHERE product_id = ${id}`)
   .then(res => {
-    // TODO:
-    // format response into data that the API is expecting
-    let data = {};
-    res.forEach(characteristic => {
-      data[characteristic.dataValues.name] = characteristic.dataValues.product_id;
-    })
+    let data = res[0];
     return data;
   })
   .catch(err => console.log('couldnt find characteristics by id', err));
