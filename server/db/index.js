@@ -93,6 +93,14 @@ Review.hasMany(Review_Photos, {
   foreignKey: 'review_id'
 })
 
+Review.hasMany(Characteristic_Review, {
+  foreignKey: 'review_id'
+})
+
+Characteristic.hasMany(Characteristic_Review, {
+  forieignKey: 'characteristic_id'
+})
+
 module.exports = {
   db,
   Characteristic,
