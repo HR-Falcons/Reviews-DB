@@ -16,6 +16,10 @@ router.get('/reviews', (req, res, next) => {
   .catch(err => console.error('Couldnt send response for reviews', err));
 })
 
+router.post('/reviews',  (req, res, next) => {
+  reviews.postReview(req.body);
+})
+
 router.get('/reviews/metadata', (req, res, next) => {
   reviews.getMetaData(req.query.product_id)
     .then(metadata => {

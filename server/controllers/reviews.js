@@ -19,6 +19,10 @@ function getReviews(id) {
   .catch(err => console.error('Couldnt query database', err));
 }
 
+function postReview(review) {
+  console.log('what my review look like?', review);
+}
+
 function getMetaData(id) {
   // return db.query(`SELECT reviews.id, reviews.rating, reviews.recommend, characteristics.name, characteristic_reviews.value
   //                 FROM reviews
@@ -33,5 +37,6 @@ function getMetaData(id) {
 
 module.exports = {
   getReviews,
+  postReview,
   getMetaData,
 }
