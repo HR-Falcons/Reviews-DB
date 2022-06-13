@@ -18,7 +18,7 @@ router.get('/reviews/metadata', (req, res, next) => {
 
 router.post('/reviews',  (req, res, next) => {
   reviews.postReview(req.body)
-    .then(status => res.status(status))
+    .then(status => res.sendStatus(status))
     .catch(err => res.status(500).send(err));
 })
 

@@ -118,40 +118,50 @@ function postReview(review) {
         })
       }
 
-      // If it's a review for a new product, insert characteristics
-      Characteristic.findAll({
+      // Query all characteristics that exist for product
+      return Characteristic.findAll({
+        attributes: ['id', 'name'],
         where: { product_id: newReview.product_id }
       })
         .then(res => {
-          // if new product, create characteristics for product, then insert values into join table
-          if (res.length === 0) {
-            for (let characteristic of ['Fit', 'Length', 'Comfort', 'Quality']) {
-              Characteristic.create({
-                product_id: newReview.product_id,
-                name: characteristic
-              })
-                .then(newCharacteristic => {
-                  Characteristic_Review.create({
-                    review_id: newReview.id,
-                    characteristic_id: newCharacteristic.id,
-                    value: review.characteristics[newCharacteristic.name]
-                  })
-                })
-            }
-          // Otherwise, just insert the values of the characteristics into the join table
-          } else {
-            for (let characteristic of res) {
-              Characteristic_Review.create({
-                review_id: newReview.id,
-                characteristic_id: characteristic.dataValues.id,
-                value: review.characteristics[characteristic.dataValues.name]
-              })
-            }
-          }
-        })
-        .catch(err => console.error('couldnt figure this out', err));
+          let data = res.dataValues || [];
+          // For any characteristics in submitted review not contained in query, insert into Characteristic
+          let charFilter = function(data) {
+            let absentChars = [];
 
-      return 201;
+            // Determine which characteristics don't exist in Characteristic table
+            for (let name in review.characteristics) {
+              let matched = false;
+              for (let char of data) {
+                if (name === char.name) {
+                  matched = true;
+                }
+              }
+              if (!matched) {
+                absentChars.push(name)
+              }
+            }
+
+            // Return an array of async insert queries (remember this is the argument to Promise.all)
+            return absentChars.map(name => Characteristic.create({ product_id: review.product_id, name: name }))
+          }
+
+          // Insert any characteristics missing for product
+          return Promise.all(charFilter(data))
+            .then(newChars => {
+              // Data now includes all characteritiscs with relevant characteristic_id
+              newChars.forEach(char => data.push({ id: char.dataValues.id, name: char.dataValues.name }));
+
+              // Finally create all things
+              return Promise.all(data.map(char => Characteristic_Review.create({
+                review_id: newReview.id,
+                characteristic_id: char.id,
+                value: review.characteristics[char.name]
+              })))
+                .then(() => 201)
+            })
+            .catch(err => console.log('theres no way ths actually works', err))
+        })
     })
     .catch(err => console.error('couldnt insert review', err));
 }
