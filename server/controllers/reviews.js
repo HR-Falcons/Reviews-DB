@@ -84,7 +84,7 @@ function getMetaData(id) {
 
 function postReview(review) {
   // Take the review and save relevant data to the reviews table
-  Review.create({
+  return Review.create({
     product_id: review.product_id,
     rating: review.rating,
     summary: review.summary,
@@ -135,6 +135,8 @@ function postReview(review) {
           }
         })
         .catch(err => console.error('couldnt figure this out', err));
+
+      return 201;
     })
     .catch(err => console.error('couldnt insert review', err));
 }

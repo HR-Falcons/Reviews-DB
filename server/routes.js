@@ -17,7 +17,9 @@ router.get('/reviews/metadata', (req, res, next) => {
 })
 
 router.post('/reviews',  (req, res, next) => {
-  reviews.postReview(req.body);
+  reviews.postReview(req.body)
+    .then(status => res.status(status))
+    .catch(err => res.status(500).send(err));
 })
 
 module.exports = router;
