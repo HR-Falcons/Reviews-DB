@@ -10,9 +10,21 @@ function getReviews(id) {
       }
     ],
     where: {
-      product_id: id
+      product_id: id,
+      reported: false
     }
   })
+    .then(reviews => reviews.map(review => {
+      return {
+        review_id: review.id,
+        rating: review.rating,
+        summary: review.summary,
+        recommend: review.recommend,
+        response: review.response,
+        body: review.body,
+        date: Date(review.date).toString()
+      }
+    }))
     .catch(err => console.error('Couldnt query database', err));
 }
 
