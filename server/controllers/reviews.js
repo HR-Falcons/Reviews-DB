@@ -141,8 +141,23 @@ function postReview(review) {
     .catch(err => console.error('couldnt insert review', err));
 }
 
+function updateHelpful(id) {
+  return Review.findOne({ where: { id: id }})
+    .then(match => match.increment('helpfulness', { by: 1 }))
+    .then(() => 204)
+    .catch(err => console.log('couldnt update helpfulness', err));
+}
+
+function updateReported(id) {
+  return Review.update({ reported: true }, { where: { id: id }})
+    .then(() => 204)
+    .catch(err => console.log('couldnt report review', err));
+}
+
 module.exports = {
   getReviews,
   getMetaData,
   postReview,
+  updateHelpful,
+  updateReported
 }

@@ -23,14 +23,14 @@ router.post('/reviews',  (req, res, next) => {
 })
 
 router.put('/reviews/:review_id/helpful', (req, res, next) => {
-  reviews.updateHelpful()
-  .then(status => res.status(status))
+  reviews.updateHelpful(req.params.review_id)
+  .then(status => res.sendStatus(status))
   .catch(err => res.status(500).send(err));
 })
 
-router.put('/reviews/:review_id/reported', (req, res, next) => {
-  reviews.updatedReported()
-    .then(status => res.status(status))
+router.put('/reviews/:review_id/report', (req, res, next) => {
+  reviews.updateReported(req.params.review_id)
+    .then(status => res.sendStatus(status))
     .catch(err => res.status(500).send(err));
 })
 
