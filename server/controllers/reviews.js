@@ -1,6 +1,6 @@
 const { db, Review, Review_Photos, Characteristic_Review, Characteristic } = require('../db/index.js');
 
-function getReviews(id) {
+function getReviews(id, page, count) {
   // Query for reviews and include any photos where 'review_id' equal to matching reviews
   return Review.findAll({
     include: [
@@ -10,9 +10,23 @@ function getReviews(id) {
       }
     ],
     where: {
-      product_id: id
-    }
+      product_id: id,
+      reported: false
+    },
+    limit: count,
+    offset: (page - 1) * count
   })
+    .then(reviews => reviews.map(review => {
+      return {
+        review_id: review.id,
+        rating: review.rating,
+        summary: review.summary,
+        recommend: review.recommend,
+        response: review.response,
+        body: review.body,
+        date: Date(review.date).toString()
+      }
+    }))
     .catch(err => console.error('Couldnt query database', err));
 }
 
@@ -49,12 +63,17 @@ function getMetaData(id) {
           data.recommended.false++;
         }
 
-        // Tally up the values of the characteristics
+        // Tally up the values of the characteristics (Please ignore the ugly code, I tried to make it readable)
         review.characteristics.forEach(characteristic => {
-          characteristic = characteristic.dataValues;
+          let characteristicInfo = characteristic.dataValues;
+          let newCharacteristic = data.characteristics[characteristic.name];
+          let isDefined = Boolean(newCharacteristic);
+          let origValue = isDefined ? newCharacteristic.value : 0;
+          let newValue = origValue + characteristic.characteristic_reviews.dataValues.value;
           data.characteristics[characteristic.name] = {
             id: characteristic.id,
-            value: data.characteristics[characteristic.name].value + characteristic.characteristic_reviews.dataValues.value
+            value: newValue,
+            count: isDefined ? newCharacteristic.count + 1 : 1
           }
         })
 
@@ -64,17 +83,13 @@ function getMetaData(id) {
         product_id: id,
         ratings: {},
         recommended: { true: 0, false: 0 },
-        characteristics: {
-          Fit: { id: 0, value: 0 },
-          Length: { id: 0, value: 0 },
-          Comfort: { id: 0, value: 0 },
-          Quality: { id: 0, value: 0 }
-        }
+        characteristics: {}
       });
 
       // Determine average value for each characteristic
       for (let name in metaData.characteristics) {
-        metaData.characteristics[name].value /= reviews.length;
+        metaData.characteristics[name].value /= metaData.characteristics[name].count;
+        delete metaData.characteristics[name].count;
       }
 
       return metaData;
@@ -103,46 +118,71 @@ function postReview(review) {
         })
       }
 
-      // If it's a review for a new product, insert characteristics
-      Characteristic.findAll({
+      // Query all characteristics that exist for product
+      return Characteristic.findAll({
+        attributes: ['id', 'name'],
         where: { product_id: newReview.product_id }
       })
         .then(res => {
-          // if new product, create characteristics for product, then insert values into join table
-          if (res.length === 0) {
-            for (let characteristic of ['Fit', 'Length', 'Comfort', 'Quality']) {
-              Characteristic.create({
-                product_id: newReview.product_id,
-                name: characteristic
-              })
-                .then(newCharacteristic => {
-                  Characteristic_Review.create({
-                    review_id: newReview.id,
-                    characteristic_id: newCharacteristic.id,
-                    value: review.characteristics[newCharacteristic.name]
-                  })
-                })
-            }
-          // Otherwise, just insert the values of the characteristics into the join table
-          } else {
-            for (let characteristic of res) {
-              Characteristic_Review.create({
-                review_id: newReview.id,
-                characteristic_id: characteristic.dataValues.id,
-                value: review.characteristics[characteristic.dataValues.name]
-              })
-            }
-          }
-        })
-        .catch(err => console.error('couldnt figure this out', err));
+          let data = res.dataValues || [];
+          // For any characteristics in submitted review not contained in query, insert into Characteristic
+          let charFilter = function(data) {
+            let absentChars = [];
 
-      return 201;
+            // Determine which characteristics don't exist in Characteristic table
+            for (let name in review.characteristics) {
+              let matched = false;
+              for (let char of data) {
+                if (name === char.name) {
+                  matched = true;
+                }
+              }
+              if (!matched) {
+                absentChars.push(name)
+              }
+            }
+
+            // Return an array of async insert queries (remember this is the argument to Promise.all)
+            return absentChars.map(name => Characteristic.create({ product_id: review.product_id, name: name }))
+          }
+
+          // Insert any characteristics missing for product
+          return Promise.all(charFilter(data))
+            .then(newChars => {
+              // Data now includes all characteritiscs with relevant characteristic_id
+              newChars.forEach(char => data.push({ id: char.dataValues.id, name: char.dataValues.name }));
+
+              // Finally create all things
+              return Promise.all(data.map(char => Characteristic_Review.create({
+                review_id: newReview.id,
+                characteristic_id: char.id,
+                value: review.characteristics[char.name]
+              })))
+                .then(() => 201)
+            })
+            .catch(err => console.log('theres no way ths actually works', err))
+        })
     })
     .catch(err => console.error('couldnt insert review', err));
+}
+
+function updateHelpful(id) {
+  return Review.findOne({ where: { id: id }})
+    .then(match => match.increment('helpfulness', { by: 1 }))
+    .then(() => 204)
+    .catch(err => console.log('couldnt update helpfulness', err));
+}
+
+function updateReported(id) {
+  return Review.update({ reported: true }, { where: { id: id }})
+    .then(() => 204)
+    .catch(err => console.log('couldnt report review', err));
 }
 
 module.exports = {
   getReviews,
   getMetaData,
   postReview,
+  updateHelpful,
+  updateReported
 }
