@@ -1,6 +1,7 @@
 const { db, Review, Review_Photos, Characteristic_Review, Characteristic } = require('../db/index.js');
 
 function getReviews(id) {
+  // Query for reviews and include any photos where 'review_id' equal to matching reviews
   return Review.findAll({
     include: [
       {
@@ -12,13 +13,11 @@ function getReviews(id) {
       product_id: id
     }
   })
-    .then(res => {
-      return res;
-    })
     .catch(err => console.error('Couldnt query database', err));
 }
 
 function getMetaData(id) {
+  // Query for reviews and include any characteristics where 'product_id' matches id, via join table
   return Review.findAll({
     include: [
       {
@@ -33,6 +32,7 @@ function getMetaData(id) {
       product_id: id
     }
   })
+    // Take all the data and reformat into the form that the client is expecting
     .then(reviews => {
       let metaData = reviews.reduce((data, review) => {
         //Tally up the ratings for a product
@@ -60,29 +60,15 @@ function getMetaData(id) {
 
         return data;
       }, {
+        // This is the form that the client is expecting for metadata
         product_id: id,
         ratings: {},
-        recommended: {
-          true: 0,
-          false: 0
-        },
+        recommended: { true: 0, false: 0 },
         characteristics: {
-          Fit: {
-            id: 0,
-            value: 0
-          },
-          Length: {
-            id: 0,
-            value: 0
-          },
-          Comfort: {
-            id: 0,
-            value: 0
-          },
-          Quality: {
-            id: 0,
-            value: 0
-          }
+          Fit: { id: 0, value: 0 },
+          Length: { id: 0, value: 0 },
+          Comfort: { id: 0, value: 0 },
+          Quality: { id: 0, value: 0 }
         }
       });
 
@@ -97,9 +83,10 @@ function getMetaData(id) {
 }
 
 function postReview(review) {
+  // Take the review and save relevant data to the reviews table
   Review.create({
     product_id: review.product_id,
-    rating: review.product_id,
+    rating: review.rating,
     summary: review.summary,
     body: review.body,
     recommend: review.recommend,
@@ -108,7 +95,7 @@ function postReview(review) {
     reviewer_email: review.email
   })
     .then(newReview => {
-      // After new review inserted, insert review photos
+      // After new review inserted, insert review photos and characteristics
       for (let photoUrl of review.photos) {
         Review_Photos.create({
           review_id: newReview.id,
@@ -116,19 +103,41 @@ function postReview(review) {
         })
       }
 
-      // If review for new product, insert characteristics
+      // If it's a review for a new product, insert characteristics
       Characteristic.findAll({
-        where: {
-          product_id: review.newReview.product_id
-        }
+        where: { product_id: newReview.product_id }
       })
-        .then(res => console.log('what my result?', res))
+        .then(res => {
+          // if new product, create characteristics for product, then insert values into join table
+          if (res.length === 0) {
+            for (let characteristic of ['Fit', 'Length', 'Comfort', 'Quality']) {
+              Characteristic.create({
+                product_id: newReview.product_id,
+                name: characteristic
+              })
+                .then(newCharacteristic => {
+                  Characteristic_Review.create({
+                    review_id: newReview.id,
+                    characteristic_id: newCharacteristic.id,
+                    value: review.characteristics[newCharacteristic.name]
+                  })
+                })
+            }
+          // Otherwise, just insert the values of the characteristics into the join table
+          } else {
+            for (let characteristic of res) {
+              Characteristic_Review.create({
+                review_id: newReview.id,
+                characteristic_id: characteristic.dataValues.id,
+                value: review.characteristics[characteristic.dataValues.name]
+              })
+            }
+          }
+        })
         .catch(err => console.error('couldnt figure this out', err));
-
     })
     .catch(err => console.error('couldnt insert review', err));
 }
-
 
 module.exports = {
   getReviews,
