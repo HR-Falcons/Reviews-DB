@@ -24,6 +24,12 @@ router.post('/reviews',  (req, res, next) => {
 
 router.put('/reviews/:review_id/helpful', (req, res, next) => {
   reviews.updateHelpful()
+  .then(status => res.status(status))
+  .catch(err => res.status(500).send(err));
+})
+
+router.put('/reviews/:review_id/reported', (req, res, next) => {
+  reviews.updatedReported()
     .then(status => res.status(status))
     .catch(err => res.status(500).send(err));
 })
