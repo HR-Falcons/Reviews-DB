@@ -1,6 +1,6 @@
 const { db, Review, Review_Photos, Characteristic_Review, Characteristic } = require('../db/index.js');
 
-function getReviews(id) {
+function getReviews(id, page, count) {
   // Query for reviews and include any photos where 'review_id' equal to matching reviews
   return Review.findAll({
     include: [
@@ -12,7 +12,9 @@ function getReviews(id) {
     where: {
       product_id: id,
       reported: false
-    }
+    },
+    limit: count,
+    offset: (page - 1) * count
   })
     .then(reviews => reviews.map(review => {
       return {
@@ -61,12 +63,17 @@ function getMetaData(id) {
           data.recommended.false++;
         }
 
-        // Tally up the values of the characteristics
+        // Tally up the values of the characteristics (Please ignore the ugly code, I tried to make it readable)
         review.characteristics.forEach(characteristic => {
-          characteristic = characteristic.dataValues;
+          let characteristicInfo = characteristic.dataValues;
+          let newCharacteristic = data.characteristics[characteristic.name];
+          let isDefined = Boolean(newCharacteristic);
+          let origValue = isDefined ? newCharacteristic.value : 0;
+          let newValue = origValue + characteristic.characteristic_reviews.dataValues.value;
           data.characteristics[characteristic.name] = {
             id: characteristic.id,
-            value: data.characteristics[characteristic.name].value + characteristic.characteristic_reviews.dataValues.value
+            value: newValue,
+            count: isDefined ? newCharacteristic.count + 1 : 1
           }
         })
 
@@ -76,17 +83,13 @@ function getMetaData(id) {
         product_id: id,
         ratings: {},
         recommended: { true: 0, false: 0 },
-        characteristics: {
-          Fit: { id: 0, value: 0 },
-          Length: { id: 0, value: 0 },
-          Comfort: { id: 0, value: 0 },
-          Quality: { id: 0, value: 0 }
-        }
+        characteristics: {}
       });
 
       // Determine average value for each characteristic
       for (let name in metaData.characteristics) {
-        metaData.characteristics[name].value /= reviews.length;
+        metaData.characteristics[name].value /= metaData.characteristics[name].count;
+        delete metaData.characteristics[name].count;
       }
 
       return metaData;

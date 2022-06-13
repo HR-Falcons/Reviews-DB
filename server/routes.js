@@ -4,7 +4,7 @@ const reviews = require('./controllers/reviews');
 var router = require('express').Router();
 
 router.get('/reviews', (req, res, next) => {
-  reviews.getReviews(req.query.product_id)
+  reviews.getReviews(req.query.product_id, req.query.page, req.query.count)
   .then(reviews => res.status(200).send(reviews))
   .catch(err => console.error('Couldnt send response for reviews', err));
 })
