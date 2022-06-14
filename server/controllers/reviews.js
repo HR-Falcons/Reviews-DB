@@ -1,6 +1,6 @@
 const { db, Review, Review_Photos, Characteristic_Review, Characteristic } = require('../db/index.js');
 
-function getReviews(id, page, count) {
+function getReviews(id, page = 1, count = 5) {
   // Query for reviews and include any photos where 'review_id' equal to matching reviews
   return Review.findAll({
     include: [
@@ -27,7 +27,7 @@ function getReviews(id, page, count) {
         date: Date(review.date).toString()
       }
     }))
-    .catch(err => console.error('Couldnt query database', err));
+    .catch(err => 400);
 }
 
 function getMetaData(id) {
@@ -94,7 +94,7 @@ function getMetaData(id) {
 
       return metaData;
     })
-    .catch(err => console.error('Couldnt get metadata', err));
+    .catch(err => 400);
 }
 
 function postReview(review) {
@@ -160,23 +160,23 @@ function postReview(review) {
               })))
                 .then(() => 201)
             })
-            .catch(err => console.log('theres no way ths actually works', err))
+            .catch(err => 400)
         })
     })
-    .catch(err => console.error('couldnt insert review', err));
+    .catch(err => 400);
 }
 
 function updateHelpful(id) {
   return Review.findOne({ where: { id: id }})
     .then(match => match.increment('helpfulness', { by: 1 }))
     .then(() => 204)
-    .catch(err => console.log('couldnt update helpfulness', err));
+    .catch(err => 400);
 }
 
 function updateReported(id) {
   return Review.update({ reported: true }, { where: { id: id }})
     .then(() => 204)
-    .catch(err => console.log('couldnt report review', err));
+    .catch(err => 400);
 }
 
 module.exports = {
