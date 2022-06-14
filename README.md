@@ -17,4 +17,4 @@
 <img width="832" alt="Metadata nosleep" src="https://user-images.githubusercontent.com/76196672/173707523-f41dd7a4-a680-4bf3-af12-40f759e9097b.png">
 
 ### Conclusion
-Judging by how these test went, I think my database and queries are optimized well enough for deployment
+Judging by how these test went, I think my database model and queries are optimized well enough for deployment
