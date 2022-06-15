@@ -1,18 +1,20 @@
-# Reviews-DB
+# Reviews-DB (testing)
 
-This database uses Postgres to store data on the reviews left on products.
+### Testing GET /reviews
 
-The schema for this database looks something like this:
-![Screen Shot 2022-06-08 at 23 17 22](https://user-images.githubusercontent.com/76196672/172733053-f904f18e-21cb-4960-bce9-0fef532da747.png)
+#### 100 users, .1 sleep, 30s
+<img width="832" alt="Reviews 1000:s" src="https://user-images.githubusercontent.com/76196672/173707400-21f3d240-fb69-4f56-959d-35726b36f072.png">
 
-To load the data (stored in CSV files) into a Postgres database, I ran the following lines in the terminal:
+#### 100 users, no sleep, 30s
+<img width="832" alt="Reviews nosleep" src="https://user-images.githubusercontent.com/76196672/173707461-0920193d-5be6-4a60-a2b1-a03850f33b70.png">
 
-1. brew install postgres              // On Mac, this installs Postgres
-2. brew services start postgres       // Start an instance of Postgres
-3. psql postgres (access the shell)   // Gain access to the shell
-4. CREATE TABLE table_name (fields);  // Create the tables according to the schema
-5. \copy table_name                   // Import the contents of the CSV file into the table, repeat for all tables and csv files
-   FROM 'filename.csv'
-   DELIMITER ','
-   CSV HEADER;
-6. \! echo 'good job!'                // Pat yourself on the back for doing an amazing job
+### Testing GET /reviews/metadata
+
+#### 100 users, .1 sleep, 30s
+<img width="832" alt="Metadata 1000:s" src="https://user-images.githubusercontent.com/76196672/173707515-07a005f4-aff7-48f1-beb1-07ef17ba9317.png">
+
+#### 100 users, no sleep, 30s
+<img width="832" alt="Metadata nosleep" src="https://user-images.githubusercontent.com/76196672/173707523-f41dd7a4-a680-4bf3-af12-40f759e9097b.png">
+
+### Conclusion
+Judging by how these test went, I think my database model and queries are optimized well enough for deployment
