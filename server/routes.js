@@ -13,13 +13,13 @@ router.get('/reviews/metadata', (req, res, next) => {
   let id = req.query.product_id;
   reviews.getMetaData(id)
   .then(data => res.status(200).send(data))
-  .catch(err => console.error('couldnt send back metadata', err));
+  .catch(err => res.status(400).send(err));
 })
 
 router.post('/reviews',  (req, res, next) => {
   reviews.postReview(req.body)
     .then(status => res.sendStatus(status))
-    .catch(err => res.status(500).send(err));
+    .catch(err => res.sendStatus(500));
 })
 
 router.put('/reviews/:review_id/helpful', (req, res, next) => {

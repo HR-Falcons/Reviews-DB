@@ -10,14 +10,8 @@ app.use(express.json());
 
 app.use('/', router);
 
-// app.get('/', (req, res) => {
-//   res.status(200).send('got your message');
-// })
-
-// app.get('/characteristics/:characteristic_id', (req, res) =>{
-//   res.status(200).send('cool stuff!');
-// })
-
 app.listen(port, () => {
-  console.log(`Database listening on port ${port}`);
+  // console.log(`Database listening on port ${port}`);
 })
+
+module.exports = app;
