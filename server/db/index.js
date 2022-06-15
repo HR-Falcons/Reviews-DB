@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
-const db = new Sequelize('postgres://localhost:5432/postgres');
+require('dotenv').config();
+const db = new Sequelize(process.env.DB_URL);
 
 const Characteristic = db.define('characteristics', {
   product_id:  {
